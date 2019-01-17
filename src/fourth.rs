@@ -61,8 +61,19 @@ impl<T> List<T> {
                     self.tail.take(); //tail = None
                 }
             }
-            old_head.borrow_mut().elem
+            Rc::try_unwrap(old_head).ok().unwrap().into_inner().elem
         })
     }
+
+    pub fn peek_front(&self) -> Option<&T> {
+        self.head.as_ref().map(|node| node.borrow().elem)
+    }
 }
+
+impl<T> Drop for List<T> {
+    fn drop(&mut self) {
+        while self.pop_front().is_some() {}
+    }
+}
+// old_head :: Rc<RefCell<Node<T>>>
 // type Link<T> = Option<Rc<RefCell<Node<T>>>>;
