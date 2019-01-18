@@ -1,4 +1,4 @@
-use std::cell::RefCell;
+use std::cell::{Ref, RefCell, RefMut};
 use std::rc::Rc;
 
 struct Node<T> {
@@ -65,8 +65,21 @@ impl<T> List<T> {
         })
     }
 
-    pub fn peek_front(&self) -> Option<&T> {
-        self.head.as_ref().map(|node| node.borrow().elem)
+    pub fn push_back(&mut self, elem: T) {
+        let new_tail = Node::new(elem);
+        match self.tail.take() {
+            Some(old_tail) => {
+                old_tail.borrow_mut().next = Some(new_tail.clone());
+                new_tail.borrow_mut().prev = Some(old_tail);
+            }
+            None => {}
+        }
+    }
+
+    pub fn peek_front(&self) -> Option<Ref<T>> {
+        self.head
+            .as_ref()
+            .map(|node| Ref::map(node.borrow(), |node| &node.elem))
     }
 }
 

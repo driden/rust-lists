@@ -1,7 +1,7 @@
 pub mod first;
+pub mod fourth;
 pub mod second;
 pub mod third;
-pub mod fourth;
 
 #[cfg(test)]
 mod tests {
@@ -77,7 +77,9 @@ mod tests {
     #[test]
     fn iter_mut() {
         let mut list = List::new();
-        list.push(1); list.push(2); list.push(3);
+        list.push(1);
+        list.push(2);
+        list.push(3);
 
         let mut iter = list.iter_mut();
         assert_eq!(iter.next(), Some(&mut 3));
@@ -110,10 +112,9 @@ mod test_third {
         // Make sure empty tail works
         let list = list.tail();
         assert_eq!(list.head(), None);
-
     }
 
-   #[test]
+    #[test]
     fn iter() {
         let list = List::new().append(1).append(2).append(3);
 
@@ -154,5 +155,16 @@ mod test_fourth {
         // Check exhaustion
         assert_eq!(list.pop_front(), Some(1));
         assert_eq!(list.pop_front(), None);
+    }
+
+    #[test]
+    fn peek() {
+        let mut list = List::new();
+        assert!(list.peek_front().is_none());
+        list.push_front(1);
+        list.push_front(2);
+        list.push_front(3);
+
+        assert_eq!(&*list.peek_front().unwrap(), &3);
     }
 }
