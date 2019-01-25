@@ -71,15 +71,53 @@ impl<T> List<T> {
             Some(old_tail) => {
                 old_tail.borrow_mut().next = Some(new_tail.clone());
                 new_tail.borrow_mut().prev = Some(old_tail);
+                self.tail = Some(new_tail);
             }
-            None => {}
+            None => {
+                self.head = Some(new_tail.clone());
+                self.tail = Some(new_tail);
+            }
         }
+    }
+
+    pub fn pop_back(&mut self) -> Option<T>{
+        self.tail.take().map(|old_tail| {
+            match old_tail.borrow_mut().prev.take() {
+                Some(new_tail) => {
+                    new_tail.borrow_mut().next.take();
+                    self.tail = Some(new_tail);                   
+                }
+                None => {
+                    self.head.take();
+                }
+            }
+            Rc::try_unwrap(old_tail).ok().unwrap().into_inner().elem
+        })
+    }
+    
+    pub fn peek_back(&self) -> Option<Ref<T>>{
+        self.tail.as_ref().map(|node| {
+            Ref::map(node.borrow(), |node| &node.elem)
+        })
+    }
+
+    pub fn peek_back_mut(&self) -> Option<RefMut<T>>{
+        self.tail.as_ref().map(|node| {
+            RefMut::map(node.borrow_mut(),|node| &mut node.elem)
+        })
     }
 
     pub fn peek_front(&self) -> Option<Ref<T>> {
         self.head
             .as_ref()
             .map(|node| Ref::map(node.borrow(), |node| &node.elem))
+    }
+
+    pub fn peek_front_mut(&mut self) -> Option<RefMut<T>>{
+        self.head.as_ref().map(|node|{
+            RefMut::map(node.borrow_mut(),|node| &mut node.elem)
+
+        })
     }
 }
 
@@ -88,5 +126,5 @@ impl<T> Drop for List<T> {
         while self.pop_front().is_some() {}
     }
 }
-// old_head :: Rc<RefCell<Node<T>>>
-// type Link<T> = Option<Rc<RefCell<Node<T>>>>;
+
+pub struct IntoIter<T>(List<T>);
